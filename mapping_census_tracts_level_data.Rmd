@@ -9,11 +9,14 @@ output:
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
+library(tidyverse)
+library(tmap)
+library(leaflet)
 ```
 
 ```{css echo = FALSE}
 li {
-  line-height: 0.8;
+  line-height: 0.85;
 }
 ```
 
@@ -22,11 +25,11 @@ Column {data-width=250}
 
 <font size="3.5">
 
-This map displays census tract-level data in Hamilton County .
+This map displays census tract-level data in Hamilton County.
 
 Using the menu on the left-hand side of the map, you can toggle variables on/off.
 
-Clicking on a census tract displays all variables for that census tract
+Clicking on a census tract displays all variables for that census tract.
 
 </font>
 
@@ -111,47 +114,8 @@ For questions, contact Cole.Brokamp@cchmc.org
 Column {data-width=750}
 -----------------------------------------------------------------------
 
-```{r data}
-library(tidyverse)
-library(tmap)
-library(leaflet)
-
-
-census_mega_data <- readRDS("census_mega_dataset-main/census_mega_data_0.2.rds")
-tract_hpsa_pc <- readRDS("data/hpsa_pc.rds")
-mua <- readRDS("data/mua.rds") %>% 
-  rename(census_tract_id = census_tract_fips)
-d.h <- readRDS("data/hamilton_data.rds")
-
-d <- census_mega_data %>% 
-  filter(census_tract_vintage == 2010) %>% 
-  select(census_tract_id, census_tract_vintage,
-         dep_index, fraction_assisted_income, fraction_high_school_edu, median_income,       
-         fraction_no_health_ins, fraction_poverty, fraction_vacant_housing,
-         adi,
-         walkability_index,
-         ice,
-         lead_paint, diesel_pm, resp_hazard_ind, traffic_proximity, ozone_conc, pm_conc,
-         coi, coi_education, coi_health_env, coi_social_econ,
-         pct_1or2_risk_factors, pct_3ormore_risk_factors,
-         hpsa_mh = hpsa,
-         ) %>% 
-  left_join(., tract_hpsa_pc, by='census_tract_id') %>%  # primary care professional shortage areas
-  left_join(., mua, by='census_tract_id') %>%     # medically underserved areas
-  mutate(hpsa_mh = replace(hpsa_mh,
-                           is.na(hpsa_mh),
-                           'no'),
-         hpsa_pc = replace(hpsa_pc,
-                           is.na(hpsa_pc),
-                           'no'),
-         mua = ifelse(mua == 0 | is.na(mua),
-                      'no',
-                      'yes')
-         )
-
-```
-
 ```{r map, fig.width = 13.5, fig.height = 10, fig.align='center'}
+d.h <- readRDS("U:/Investigator Folders/DBE/Cole Brokamp/RISEUP/Census_tract_data_map/RISEUP-Census-Tract-Level-Data-Mapping/data/hamilton_data.rds")
 
 tmap_mode('view')
 tmap_options(max.categories = 81)
