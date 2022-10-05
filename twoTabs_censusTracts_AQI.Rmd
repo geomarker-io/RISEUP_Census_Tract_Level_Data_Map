@@ -267,6 +267,8 @@ AQI            Category
 201 to 300     <span style="color: purple;">Very Unhealthy</span>
 301 to 500     <span style="color: maroon;">Hazardous</span>
 
+Current air quality in Cincinnati area can be found on [AirNow](https://www.airnow.gov/?city=Cincinnati&state=OH&country=USA)
+
 </table>
 
 
