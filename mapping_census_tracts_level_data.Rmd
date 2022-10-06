@@ -158,7 +158,7 @@ data_col = c('dep_index', 'adi', 'ice', 'fraction_poverty', 'fraction_assisted_i
              'hpsa_mh', 'hpsa_pc', 'mua')
 
 tm <- tm_shape(d.h, 
-               name = 'Neiborhoods') +
+               name = 'Neighborhoods') +
   tm_polygons(col="neighborhood", 
               alpha = 0.2,
               legend.show = FALSE,
