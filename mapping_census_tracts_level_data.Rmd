@@ -16,7 +16,7 @@ library(leaflet)
 
 ```{css echo = FALSE}
 li {
-  line-height: 0.85;
+  line-height: 0.9;
 }
 ```
 
@@ -96,8 +96,6 @@ Variables Include:
   * Medically Underserved Areas
   
 </font>
-
-<br>
 
 <br>
 
@@ -217,6 +215,8 @@ tm <- tm_shape(d.h,
             free.scales.fill = TRUE) 
   
 tm %>% 
+  tmap_leaflet() %>%
+  leaflet::hideGroup(names(legend_labels)[1:25]) %>% 
   leaflet.extras::addFullscreenControl()
 
 ```
