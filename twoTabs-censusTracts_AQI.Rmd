@@ -13,6 +13,7 @@ library(tidyverse)
 library(hrbrthemes)
 library(tmap)
 library(leaflet)
+library(plotly)
 ```
 
 ```{css echo = FALSE}
@@ -41,11 +42,11 @@ Clicking on a census tract displays all variables for that census tract.
 
 Variables Include: 
 
-  * [Community Material Depreivaiton Index](https://geomarker.io/dep_inde)
+  * [Community Material Deprivation Index](https://geomarker.io/dep_index)
 
-  * Neighborhood Atlas Area Deprivation Index
+  * [Neighborhood Atlas Area Deprivation Index](https://www.neighborhoodatlas.medicine.wisc.edu/)
       
-  * American Community Survey Sociodeomgraphic Variables
+  * [American Community Survey Sociodeomgraphic Variables](https://www.census.gov/programs-surveys/acs)
   
     + Fraction Assisted Income
     
@@ -59,11 +60,11 @@ Variables Include:
     
     + Fraction Vacant Housing
       
-  * National Walkability Index
+  * [National Walkability Index](https://www.epa.gov/smartgrowth/smart-location-mapping#walkability)
   
-  * Nancy Krieger's Index of Concentrated Extremes (ICE)
+  * [Nancy Krieger's Index of Concentrated Extremes (ICE)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4815605/)
   
-  * EPA EJScreen
+  * [EPA EJScreen](https://www.epa.gov/ejscreen)
   
       + Lead Paint Indicator
       
@@ -77,7 +78,7 @@ Variables Include:
       
       + Annual Average PM2.5 Level in Air (ug/m3)
       
-  * Child Opportunity Index
+  * [Child Opportunity Index](https://www.diversitydatakids.org/child-opportunity-index)
   
       + Overall
       
@@ -87,17 +88,17 @@ Variables Include:
       
       + Social and Economic Domain
       
-  * Census' Community Resilience Index
+  * [Census' Community Resilience Index](Census' Community Resilience Index)
   
       + Rate of Individuals with One or Two Risk Factors
       
       + Rate of Individuals with Three or More Risk Factors
       
-  * Mental Health Professional Shortage Areas
+  * [Mental Health Professional Shortage Areas](https://data.hrsa.gov/topics/health-workforce/shortage-areas)
   
-  * Primary Care Professional Shortage Areas
+  * [Primary Care Professional Shortage Areas](https://data.hrsa.gov/topics/health-workforce/shortage-areas)
   
-  * Medically Underserved Areas
+  * [Medically Underserved Areas](https://data.hrsa.gov/topics/health-workforce/shortage-areas)
   
 </font>
 
@@ -186,8 +187,8 @@ tm <- tm_shape(d.h,
               id = "id",
               popup.vars = legend_labels) +
   tm_shape(d.h) +
-  tm_polygons(col = data_col[16:17], 
-              title = names(legend_labels)[16:17],
+  tm_polygons(col = data_col[16:18], 
+              title = names(legend_labels)[16:18],
               alpha = 0.5, 
               palette = 'viridis', 
               style = "quantile", 
@@ -202,11 +203,12 @@ tm <- tm_shape(d.h,
               id = "id",
               popup.vars = legend_labels) +
   tm_shape(d.h) +
-  tm_polygons(col = data_col[c(3, 18:22)], 
-              title = names(legend_labels)[c(3, 18:22)],
+  tm_polygons(col = data_col[c(3, 19:22)], 
+              title = names(legend_labels)[c(3, 19:22)],
               alpha = 0.5, 
               palette = 'viridis', 
-              style = "quantile", 
+              style = "quantile",  
+              midpoint=0,
               id = "id",
               popup.vars = legend_labels) +
   tm_shape(d.h) +
@@ -222,7 +224,7 @@ tm <- tm_shape(d.h,
   
 tm %>% 
   tmap_leaflet() %>%
-  leaflet::hideGroup(names(legend_labels)[1:25]) %>% 
+  leaflet::hideGroup(names(legend_labels)[2:25]) %>% 
   leaflet.extras::addFullscreenControl()
 
 ```
@@ -249,7 +251,7 @@ AQI            Category
 201 to 300     <span style="color: purple;">Very Unhealthy</span>
 301 to 500     <span style="color: maroon;">Hazardous</span>
 
-The current air quality in Cincinnati area can be found on [AirNow](https://www.airnow.gov/?city=Cincinnati&state=OH&country=USA)
+The current air quality in Cincinnati area can be found on [AirNow](https://www.airnow.gov/?city=Cincinnati&state=OH&country=USA).
 
 </table>
 
@@ -264,10 +266,6 @@ Column {data-width=750}
 aqi.hamilton <- readRDS("U:/Investigator Folders/DBE/Cole Brokamp/RISEUP/AQI/data/aqi_hamilton.rds")
 
 p <- ggplot(aqi.hamilton, aes(x=Date, y=AQI)) +
-  geom_line( color="steelblue") + 
-  xlab("Year") +
-  ylab("Air Qualtiy Index") +
-  theme_ipsum() +
   scale_x_date(limit=c(as.Date("2015-01-01"),as.Date("2022-03-31"))) +
   annotate("rect",
            xmin = as.Date("2015-01-01"), xmax = as.Date("2022-03-31"),
@@ -276,20 +274,26 @@ p <- ggplot(aqi.hamilton, aes(x=Date, y=AQI)) +
            alpha = 0.2) + 
   annotate("rect",
            xmin = as.Date("2015-01-01"), xmax = as.Date("2022-03-31"),
-                ymin = 51, ymax = 100,
-            fill = "yellow",
-            alpha = 0.2) + 
+           ymin = 51, ymax = 100,
+           fill = "yellow",
+           alpha = 0.2) + 
   annotate("rect",
            xmin = as.Date("2015-01-01"), xmax = as.Date("2022-03-31"),
-            ymin = 101, ymax = 150,
-            fill = "orange",
-            alpha = 0.2) + 
+           ymin = 101, ymax = 150,
+           fill = "orange",
+           alpha = 0.2) + 
   annotate("rect",
            xmin = as.Date("2015-01-01"), xmax = as.Date("2022-03-31"),
-            ymin = 151, ymax = 200,
-            fill = "red",
-            alpha = 0.2)  
-p
+           ymin = 151, ymax = 200,
+           fill = "red",
+           alpha = 0.2) +
+  geom_line( color="steelblue") + 
+  xlab("Year") +
+  ylab("Air Qualtiy Index") +
+  theme_ipsum(axis_text_size = 12,
+              axis_title_size = 14) 
+
+ggplotly(p)
 
 ```
 
