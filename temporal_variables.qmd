@@ -1,0 +1,157 @@
+---
+title: "Temporal Variables"
+format: html
+editor: visual
+execute: 
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+library(tidyverse)
+library(GGally)
+
+aqi <- readRDS("data/aqi_hamilton.rds") |>
+  filter(Date < as.Date("2022-12-31"),
+         Date > "2020-12-31") |>
+  rename(date = Date) |>
+  select(date, AQI)
+
+pollen <- readRDS("data/pollen_calculations.rds") |>
+  mutate(date = as.Date(date)) |>
+  select(date,
+         pollen = Total) |>
+  filter(!is.na(pollen),
+         !is.na(date),
+         date < max(aqi$date),
+         date > "2020-12-31")
+
+mold <- readRDS("data/mold_calculations.rds")|>
+  mutate(date = as.Date(date)) |>
+  select(date,
+         mold = Total) |>
+  filter(!is.na(mold),
+         !is.na(date),
+         date < max(aqi$date),
+         date > "2020-12-31")
+
+weather <- readRDS("data/weather.rds")
+```
+
+# Scatter Plot Matrix
+
+```{r}
+#| message: false
+#| warning: false
+d_wide <- aqi |>
+  full_join(pollen, by = "date") |>
+  full_join(mold, by = "date") |>
+  full_join(weather, by = "date") 
+
+ggpairs(d_wide, columns = 2:ncol(d_wide))
+ggsave("plots/pollen_weather_scatter.png", width = 10, height = 8)
+```
+
+
+# Faceted Line Plot with Free Scales
+
+```{r} 
+#| fig-height: 10
+
+d_long <- d_wide |>
+  pivot_longer(cols = !date, 
+               names_to = "name", 
+               values_to = "value")
+
+ggplot() + 
+  geom_line(data = d_long, 
+            aes(x = date, 
+                y = value, 
+                color = name)) +
+  facet_wrap(~ name, 
+             ncol = 1, 
+             scales = "free") +
+  theme(legend.position = "none", 
+        axis.title = element_blank())
+```
+## Log Transformed Pollen 
+
+```{r}
+#| fig-height: 10
+d_wide_log <- d_wide |>
+  mutate(pollen_log = log(pollen))
+  
+d_long_log <- d_wide_log |>
+  pivot_longer(cols = !date, 
+               names_to = "name", 
+               values_to = "value")
+ggplot() + 
+  geom_line(data = d_long_log, 
+            aes(x = date, 
+                y = value, 
+                color = name)) +
+  facet_wrap(~ name, 
+             ncol = 1, 
+             scales = "free") +
+  theme(legend.position = "none", 
+        axis.title = element_blank())
+
+ggsave("plots/faceted_line_plot.png", height = 10)
+```
+
+# Smoothed Line Plots
+
+```{r}
+#| fig-height: 10
+
+ggplot() + 
+  geom_smooth(data = d_long_log, 
+            aes(x = date, 
+                y = value, 
+                color = name)) +
+  facet_wrap(~ name, 
+             ncol = 1, 
+             scales = "free") +
+  theme(legend.position = "none", 
+        axis.title = element_blank())
+
+ggsave("plots/smoothed_faceted_line_plot.png", height = 10)
+```
+
+```{r}
+d_wide_log <- d_wide_log |>
+  mutate(mold_log = log(mold))
+
+d_wide_log <- select(d_wide_log, -pollen, -mold)
+  
+d_long_log <- d_wide_log |>
+  pivot_longer(cols = !date, 
+               names_to = "name", 
+               values_to = "value")
+
+ggplot() + 
+  geom_line(data = d_long_log, 
+            stat = "smooth", 
+            aes(x = date, 
+                y = value, 
+                color = name), 
+            alpha = 0.5, 
+            size = 1) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+ggplot() + 
+  geom_line(data = d_long_log, 
+            # stat = "smooth", 
+            aes(x = date, 
+                y = value, 
+                color = name), 
+            alpha = 0.5, 
+            size = 1) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
